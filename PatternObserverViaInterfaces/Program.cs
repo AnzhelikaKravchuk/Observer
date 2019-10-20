@@ -20,8 +20,6 @@ static class Program
         heater.OnTemperatureChanged(thermostat.CurrentTemperature);
 
         cooler.Update(thermostat.CurrentTemperature);
-
-
     }
 }
 
