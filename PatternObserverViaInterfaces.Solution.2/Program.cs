@@ -8,6 +8,22 @@ namespace PatternObserverViaInterfaces.Solution._2
     {
         static void Main(string[] args)
         {
+            Thermostat thermostat = new Thermostat();
+
+            Heater heater = new Heater(30);
+
+            Cooler cooler = new Cooler(40);
+
+            //thermostat.Register(heater);
+            
+            //thermostat.Register(cooler);
+            
+            thermostat.EmulateTemperatureChange();
+
+            //thermostat.Unregister(cooler);
+            
+            thermostat.EmulateTemperatureChange();
+
             //coздать объект класса Thermostat
 
             //coздать объект класса Heater установив начальную температуру равную 30 градусов
@@ -41,18 +57,97 @@ namespace PatternObserverViaInterfaces.Solution._2
         void Notify();
     }
 
-    public class Cooler 
+    public class Cooler  : IObserver
     {
-        //TODO
+        public Cooler(int temperature)
+        {
+            Temperature = temperature;
+        }
+
+        public float Temperature { get; private set; }
+
+        public void Update(IObservable sender, int newTemperature)
+        {
+            if (newTemperature > Temperature)
+            {
+                Console.WriteLine($"Cooler: On. Changed:{Math.Abs(newTemperature - Temperature)}");
+            }
+            else
+            {
+                Console.WriteLine($"Cooler: Off. Changed:{Math.Abs(newTemperature - Temperature)}");
+            }
+        }
     }
 
-    public class Heater 
+    public class Heater  : IObserver
     {
-        //TODO
+        public Heater(int temperature)
+        {
+            Temperature = temperature;
+        }
+
+        public float Temperature { get; private set; }
+
+        public void Update(IObservable sender, int newTemperature)
+        {
+            if (newTemperature < Temperature)
+            {
+                Console.WriteLine($"Heater: On. Changed:{Math.Abs(newTemperature - Temperature)}");
+            }
+            else
+            {
+                Console.WriteLine($"Heater: Off. Changed:{Math.Abs(newTemperature - Temperature)}");
+            }
+        }
     }
 
-    public class Thermostat
+    public class Thermostat : IObservable
     {
-        //TODO
+        private int currentTemperature;
+
+        private Random random = new Random(Environment.TickCount);
+        
+        private readonly List<IObserver> observers;
+        
+        public Thermostat()
+        {
+            observers = new List<IObserver>();
+        }
+        
+        public void Register(IObserver observer)
+        {
+            observers.Add(observer);
+        }
+
+        public void Unregister(IObserver observer)
+        {
+            observers.Remove(observer);
+        }
+
+        public void Notify()
+        {
+            foreach (var observer in observers)
+            {
+                observer.Update(this, currentTemperature);
+            }
+        }
+        
+        public int CurrentTemperature
+        {
+            get => currentTemperature;
+            private set
+            {
+                if (value != currentTemperature)
+                {
+                    currentTemperature = value;
+                    Notify();
+                }
+            }
+        }
+
+        public void EmulateTemperatureChange()
+        {
+            this.CurrentTemperature = random.Next(0, 100);
+        }
     }
 }
